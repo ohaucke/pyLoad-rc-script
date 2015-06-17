@@ -1,0 +1,43 @@
+#!/bin/sh
+ 
+# $FreeBSD$
+#
+# PROVIDE:  pyload
+# REQUIRE:  LOGIN
+# KEYWORD:  shutdown
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service and change the shebang in pyLoadCory.py to: #!/usr/local/bin/python
+#  pyload_enable="YES"
+#  # Optional
+#  pyload_path="/usr/local/etc/pyload"
+#  pyload_flags="--daemon"
+#  pyload_pid="/var/run/pyload.pid"
+#  pyload_user="pyload"
+ 
+. "/etc/rc.subr"
+ 
+PATH="$PATH:/usr/local/bin"
+ 
+name=pyload
+rcvar=${name}_enable
+load_rc_config $name
+ 
+: ${pyload_enable:="NO"}
+: ${pyload_flags:="--daemon"}
+: ${pyload_path:="/usr/local/etc/${name}"}
+: ${pyload_pid:="/var/run/${name}.pid"}
+: ${pyload_user:="pyload"}
+ 
+required_files="${pyload_path}/pyload.conf"
+pidfile="${pyload_pid}"
+ 
+command_interpreter="/usr/local/bin/python"
+command="${pyload_path}/pyLoadCore.py"
+command_args="--pidfile=${pidfile} --configdir=${pyload_path}"
+command_full="${command_interpreter} ${command} ${command_args}"
+ 
+start_cmd="su -m ${pyload_user} -c '${command_full} ${pyload_flags}'"
+stop_cmd="su -m ${pyload_user} -c '${command_full} --quit'"
+ 
+run_rc_command "$1"
